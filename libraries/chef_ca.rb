@@ -2,7 +2,7 @@
 # Cookbook: chef_ca
 # Library: chef_ca
 #
-# Copyright:: 2018 Nordstrom, Inc.
+# Copyright:: 2020 Sous Chefs
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
