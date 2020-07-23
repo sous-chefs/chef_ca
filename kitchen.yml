@@ -2,7 +2,8 @@
 driver:
   name: vagrant
 driver_config:
-  require_chef_omnibus: 15
+  product_name: chef
+  product_version: 15
 
 provisioner:
   name: chef_zero
