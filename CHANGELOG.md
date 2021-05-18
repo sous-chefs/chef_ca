@@ -1,5 +1,10 @@
-Change log for chef_ca
+# Change log for chef_ca
 
-0.1.0
+## unreleased
+
+- Chef 17 Compatibility
+- Chef version >= 15.3
+
+## 0.1.0
 
 - Initial version
