@@ -1,6 +1,6 @@
 # Change log for chef_ca
 
-## unreleased
+## 1.0.0 - *2021-05-20*
 
 - Chef 17 Compatibility
 - Chef version >= 15.3
