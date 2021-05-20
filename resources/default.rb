@@ -9,6 +9,9 @@ default_action :set
 property :type, Symbol, equal_to: %i(chef chefdk), required: true
 property :ca_bundle, String
 property :cacert_path, [String, NilClass]
+
+unified_mode true
+
 include ::ChefCA
 
 action_class do

@@ -4,7 +4,7 @@ maintainer_email 'help@sous-chefs.org'
 license          'Apache-2.0'
 description      'Adds a certificate bundle to the chef or chefdk cacert file'
 version          '0.1.0'
-chef_version     '>= 12.10'
+chef_version     '>= 15.13'
 
 issues_url       'https://github.com/sous-chefs/chef_ca/issues'
 source_url       'https://github.com/sous-chefs/chef_ca'
