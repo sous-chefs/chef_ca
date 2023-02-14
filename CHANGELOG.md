@@ -1,6 +1,6 @@
 # Change log for chef_ca
 
-## Unreleased
+## 1.0.3 - *2023-02-14*
 
 - Remove delivery folder
 
