@@ -1,6 +1,6 @@
 # Change log for chef_ca
 
-## Unreleased
+## 1.0.5 - *2023-03-02*
 
 ## 1.0.4 - *2023-02-14*
 
