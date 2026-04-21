@@ -1,102 +1,62 @@
-#
-# Cookbook: chef_ca
-# Spec: libraries/chef_ca_spec
-#
-# Copyright:: 2018 Sous Chefs
-#
-# Licensed under the Apache License, Version 2.0 (the 'License');
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+# frozen_string_literal: true
 
-require 'rspec_helper'
-require 'ostruct'
+require 'spec_helper'
 require 'tempfile'
-include ChefCA
 
-describe 'cacerts class' do
-  context 'compute the path' do
-    before do
-      @name = 'Test cert'
-      @bundle = test_bundle
-      @path = nil
-      @type = :chef
+RSpec.describe ChefCA::Helpers do
+  subject(:helper_host) do
+    Class.new do
+      include ChefCA::Helpers
+    end.new
+  end
+
+  let(:bundle) do
+    <<~PEM.chomp
+      -----BEGIN CERTIFICATE-----
+      MIIFFTCCAv2gAwIBAgIQNo9XwT6QsblLA+3qdriHZTANBgkqhkiG9w0BAQsFADAd
+      -----END CERTIFICATE-----
+    PEM
+  end
+
+  describe '#cacert_path_for' do
+    it 'computes the Chef Infra Client path on Linux' do
+      expect(helper_host.cacert_path_for(:chef, platform_family: 'rhel')).to eq('/opt/chef/embedded/ssl/certs/cacert.pem')
     end
 
-    it 'should compute cacert path for mac chef' do
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      allow(cacerts).to receive(:os_type).and_return('darwin')
-      expect(cacerts.cacert_path).to eq('/opt/chef/embedded/ssl/certs/cacert.pem')
+    it 'computes the Chef Workstation path on Windows' do
+      expect(helper_host.cacert_path_for(:chef_workstation, platform_family: 'windows')).to eq('C:/opscode/chef-workstation/embedded/ssl/certs/cacert.pem')
     end
 
-    it 'should compute cacert path for linux chef' do
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      allow(cacerts).to receive(:os_type).and_return('linux')
-      expect(cacerts.cacert_path).to eq('/opt/chef/embedded/ssl/certs/cacert.pem')
+    it 'retains legacy ChefDK targeting' do
+      expect(helper_host.cacert_path_for(:chefdk, platform_family: 'mac_os_x')).to eq('/opt/chefdk/embedded/ssl/certs/cacert.pem')
     end
 
-    it 'should compute cacert path for linux chefdk' do
-      @type = :chefdk
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      expect(cacerts.cacert_path).to eq('/opt/chefdk/embedded/ssl/certs/cacert.pem')
-    end
-
-    it 'should compute cacert path for windows chefdk' do
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      allow(cacerts).to receive(:os_type).and_return('windows')
-      expect(cacerts.cacert_path).to eq('c:/opscode/chef/embedded/ssl/certs/cacert.pem')
-    end
-
-    it 'should use the specifed cacert path' do
-      @path = '/specified/cacert.pem'
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      expect(cacerts.cacert_path).to eq('/specified/cacert.pem')
+    it 'uses an explicit cacert path override' do
+      expect(helper_host.cacert_path_for(:chef, platform_family: 'ubuntu', cacert_path: '/tmp/cacert.pem')).to eq('/tmp/cacert.pem')
     end
   end
 
-  context 'check cert installed and install it' do
-    before do
-      @name = 'Test cert'
-      @bundle = test_bundle
-      @path = Tempfile.new('cacerts')
-      @path.puts initial_cacerts
-      @path.rewind
+  describe '#bundle_installed?' do
+    it 'returns false when the target file is missing' do
+      expect(helper_host.bundle_installed?('/tmp/chef-ca-missing.pem', bundle)).to be(false)
     end
 
-    it 'should show not installed' do
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      expect(cacerts.bundle_installed?).to be_falsey
-    end
+    it 'returns true when the bundle already exists' do
+      file = Tempfile.new('cacert')
+      file.write(bundle)
+      file.close
 
-    it 'should show installed' do
-      cacerts = CaCerts.new(@name, @type, initial_cacerts, @path)
-      expect(cacerts.bundle_installed?).to be_truthy
-    end
-
-    it 'should add the certs' do
-      cacerts = CaCerts.new(@name, @type, @bundle, @path)
-      cacerts.bundle_install
-      expect(cacerts.bundle_installed?).to be_truthy
+      expect(helper_host.bundle_installed?(file.path, bundle)).to be(true)
+    ensure
+      file.unlink
     end
   end
-end
 
-def test_bundle
-  '-----BEGIN CERTIFICATE-----
-MIIFFTCCAv2gAwIBAgIQNo9XwT6QsblLA+3qdriHZTANBgkqhkiG9w0BAQsFADAd
------END CERTIFICATE-----'
-end
-
-def initial_cacerts
-  '-----BEGIN CERTIFICATE-----
-MIIFINITALCERTIBAgIQNo9XwT6QsblLA+3qdriHZTANBgkqhkiGFFFFFFFFFFFF
------END CERTIFICATE-----'
+  describe '#bundle_entry' do
+    it 'formats the appended certificate block' do
+      expect(helper_host.bundle_entry('internal-root-ca', bundle)).to eq(
+        "Cert Bundle - internal-root-ca\n===========================\n#{bundle}"
+      )
+    end
+  end
 end

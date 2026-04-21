@@ -1,3 +1,14 @@
 # Testing
 
-Please refer to [the community cookbook documentation on testing](https://github.com/chef-cookbooks/community_cookbook_documentation/blob/master/TESTING.MD).
+Run lint and unit tests with:
+
+```text
+cookstyle
+chef exec rspec --format documentation
+```
+
+Run the default integration suite with Dokken:
+
+```text
+KITCHEN_LOCAL_YAML=kitchen.dokken.yml kitchen test default-ubuntu-2204 --destroy=always
+```
