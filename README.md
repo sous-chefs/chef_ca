@@ -1,30 +1,41 @@
 # chef_ca cookbook
 
-Chef client code uses a private list of certificate authority credentials.
-This cookbook will add a supplied bundle to the chef cacert.pem file.
+`chef_ca` appends a PEM-encoded certificate bundle to the `cacert.pem` file used by an existing
+Chef Infra Client, Chef Workstation omnibus install, or legacy ChefDK install.
+
+This cookbook exposes a custom resource only. There are no cookbook recipes or attributes.
 
 ## Resource
 
-### chef_ca
+### `chef_ca`
 
 #### Actions
 
-* set - adds the credentials to the cacert.pem file
+- `:set` appends the bundle when it isn't already present
 
-Properties
+#### Properties
 
-* chef_type - chef client or chefdk. Allowed values are :chef for :chefdk
+- `type` selects the target install. Accepted values are `:chef`, `:chef_workstation`, and legacy `:chefdk`. Default: `:chef`
+- `ca_bundle` is the PEM-encoded certificate bundle to append
+- `cacert_path` overrides automatic path detection when you need a nonstandard target
 
-* ca_bundle - cer (X.509, base 64 encode) format bundle to add
+#### Examples
 
-* cacert_path - path to the cacert file to be modified
+```ruby
+chef_ca 'internal-root-ca' do
+  ca_bundle <<~PEM
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+  PEM
+end
+```
 
-#### Processing
+```ruby
+chef_ca 'workstation-root-ca' do
+  type :chef_workstation
+  ca_bundle lazy { ::File.read('/etc/pki/ca-trust/source/anchors/internal.pem') }
+end
+```
 
-Use the os type and software type to find the cacert.pem file.
-Add the bundle to that file. Currently supports windows, linux and mac servers.
-
-#### Style
-
-Use cookstyle for ruby linting.
-Use foodcritic for cookbook checking.
+Resource documentation lives in [`documentation/chef_ca_chef_ca.md`](documentation/chef_ca_chef_ca.md).

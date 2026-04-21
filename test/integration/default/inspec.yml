@@ -1,0 +1,7 @@
+---
+name: default
+title: chef_ca default suite
+maintainer: Sous Chefs
+license: Apache-2.0
+summary: Integration tests for the chef_ca resource
+version: 1.0.0
