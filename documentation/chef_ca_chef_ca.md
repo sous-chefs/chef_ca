@@ -4,17 +4,17 @@ Appends a PEM certificate bundle to the `cacert.pem` trust store used by an exis
 
 ## Actions
 
-| Action | Description |
-|---|---|
+| Action | Description                                                |
+|--------|------------------------------------------------------------|
 | `:set` | Appends the bundle when it isn't already present (default) |
 
 ## Properties
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `type` | Symbol | `:chef` | Target install type: `:chef`, `:chef_workstation`, or legacy `:chefdk` |
-| `ca_bundle` | String | none | PEM-encoded certificate bundle to append |
-| `cacert_path` | String | auto-detected | Explicit path override for the target `cacert.pem` |
+| Property      | Type   | Default       | Description                                                            |
+|---------------|--------|---------------|------------------------------------------------------------------------|
+| `type`        | Symbol | `:chef`       | Target install type: `:chef`, `:chef_workstation`, or legacy `:chefdk` |
+| `ca_bundle`   | String | none          | PEM-encoded certificate bundle to append                               |
+| `cacert_path` | String | auto-detected | Explicit path override for the target `cacert.pem`                     |
 
 ## Examples
 
