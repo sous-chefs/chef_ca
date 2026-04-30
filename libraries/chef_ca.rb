@@ -1,61 +1,44 @@
-#
-# Cookbook: chef_ca
-# Library: chef_ca
-#
-# Copyright:: 2020 Sous Chefs
-#
-# Licensed under the Apache License, Version 2.0 (the 'License');
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+# frozen_string_literal: true
 
-# ChefCA name space
 module ChefCA
-  # Mange the certificate bundles in the chef cacert.pem file
-  class CaCerts
-    def initialize(name, type, bundle, path)
-      @name = name
-      @type = type
-      @bundle = bundle
-      @path = path
-      @os = os_type
+  module Helpers
+    def bundle_entry(name, bundle)
+      <<~CERT.chomp
+        Cert Bundle - #{name}
+        ===========================
+        #{bundle}
+      CERT
     end
 
-    def cacert_path
-      @path || @path = computed_cacert_path
+    def bundle_installed?(path, bundle)
+      return false unless ::File.exist?(path)
+
+      ::File.read(path).include?(bundle)
     end
 
-    def bundle_install
-      open(cacert_path, 'a') do |f|
-        f.puts "Cert Bundle - #{@name}"
-        f.puts '==========================='
-        f.puts @bundle
+    def cacert_path_for(type, platform_family:, cacert_path: nil)
+      return cacert_path if cacert_path
+
+      "#{cacert_root_for(type, platform_family: platform_family)}/embedded/ssl/certs/cacert.pem"
+    end
+
+    def cacert_root_for(type, platform_family:)
+      prefix = platform_family == 'windows' ? 'C:/opscode' : '/opt'
+
+      "#{prefix}/#{install_directory_name(type)}"
+    end
+
+    def install_directory_name(type)
+      case type
+      when :chef
+        'chef'
+      when :chef_workstation
+        'chef-workstation'
+      when :chefdk
+        'chefdk'
+      else
+        raise ArgumentError, "Unsupported chef_ca type #{type.inspect}"
       end
-    end
-
-    def bundle_installed?
-      chef_cacert_pem = ::File.read(cacert_path)
-      chef_cacert_pem.include?(@bundle)
-    end
-
-    def computed_cacert_path
-      # linux, mac(darwin), solaris
-      return "/opt/#{@type}/embedded/ssl/certs/cacert.pem" if os_type =~ /linux|darwin|solaris/
-      # windows
-      return "c:/opscode/#{@type}/embedded/ssl/certs/cacert.pem" if os_type =~ /windows|mingw/
-      raise "chef-ca unsupported os type #{os_type}"
-    end
-
-    def os_type
-      @os || RbConfig::CONFIG['host_os'].downcase
     end
   end
 end

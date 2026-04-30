@@ -3,5 +3,5 @@ driver: { name: exec }
 transport: { name: exec }
 
 platforms:
-  - name: macos-latest
-  - name: windows-latest
+  - name: macos-14
+  - name: windows-2022
