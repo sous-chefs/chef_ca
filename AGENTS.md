@@ -1,4 +1,15 @@
-# Limitations
+# AGENTS.md
+
+## Cookbook Purpose
+
+Adds a certificate bundle to the Chef Infra Client or Workstation cacert file
+
+## Agent Findings
+
+* This cookbook is in an incremental modernization pass. Preserve existing public recipes and attributes unless a later full migration is explicitly selected.
+* Dependency management should use `Policyfile.rb`; do not reintroduce Berkshelf.
+
+## Known Limitations
 
 As of April 21, 2026, this cookbook manages the `cacert.pem` trust bundle used by existing
 Chef omnibus installs. It doesn't install Chef products; it only appends a CA bundle to an
